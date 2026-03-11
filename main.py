@@ -54,7 +54,7 @@ def forward_selection(data):
 
     while remaining:
         best_feature = None # best feature to add at a certain branch level
-        branchlevel_acc = -float("inf")
+        branchlevel_acc = current_acc
         for new_feature in sorted(remaining): # test all features
             test_features = current_set + [new_feature] # test current feature set + additional
             acc = nearest_neighbor(data, test_features)
@@ -63,7 +63,8 @@ def forward_selection(data):
             if acc > branchlevel_acc: # if test feature is better than our other features at this level
                 branchlevel_acc = acc
                 best_feature = new_feature
-
+        if best_feature is None:    # early abandomment, if adding new features atlevel doesnt improve, break off.
+            break
         current_set.append(best_feature) # add feature to this iteration
         remaining.remove(best_feature) # remove from set. we would not test it again
         current_acc = branchlevel_acc
@@ -75,26 +76,27 @@ def forward_selection(data):
 
     return best_set, best_acc
 
+
 def main():
     while True:
         choice = input("Select dataset: type '1' for small, '2' for large, '3' for sanitycheck1, '4' for sanitycheck2: ").strip()
         if choice == '1':
             data_file = 'CS170_Small_DataSet__31.txt'
-            break
         if choice == '2':
             data_file = 'CS170_Large_DataSet__7.txt'
-            break
         if choice == '3':
             data_file = 'SanityCheck_DataSet__1.txt'
-            break
         if choice == '4':
-            data_file = 'SanityCheckDataSet__2.txt'
-            break    
+            data_file = 'SanityCheckDataSet__2.txt' 
         print("Please enter '1' or '2'.")
   
-    data = load(data_file)
-
-    selected, sel_acc = forward_selection(data)
+        data = load(data_file)
+        choice = input("Select algorithm: type '1' for forward selection and '2' for backwards elimination").strip()
+        if choice == '1':
+            selected, sel_acc = forward_selection(data)
+            break
+        print("Please enter '1' or '2'.")
+    
     print(f"Finished Search! The best feature subset is {selected}, which has an accuracy of {sel_acc:%}")
 
 
