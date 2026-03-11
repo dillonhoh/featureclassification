@@ -112,6 +112,8 @@ def backward_elimination(data):
 
 def main():
     while True:
+        print("Welcome to my Feature Selection Classifier Algorithm \n")
+
         choice = input("Select dataset: type '1' for small, '2' for large, '3' for sanitycheck1, '4' for sanitycheck2: ").strip()
         if choice == '1':
             data_file = 'CS170_Small_DataSet__31.txt'
@@ -120,11 +122,15 @@ def main():
         if choice == '3':
             data_file = 'SanityCheck_DataSet__1.txt'
         if choice == '4':
-            data_file = 'SanityCheckDataSet__2.txt' 
-        print("Please enter '1' or '2'.")
+            data_file = 'SanityCheckDataSet__2.txt'
   
         data = load(data_file)
-        choice = input("Select algorithm: type '1' for forward selection and '2' for backwards elimination").strip()
+        
+        print("Type the number of the algorithm you want to run. \n")
+        print("\t 1) Forward Selection")
+        print("\t 2) Backward Elimination \n")
+
+        choice = input("Select: ").strip()
         if choice == '1':
             selected, sel_acc = forward_selection(data)
             break
