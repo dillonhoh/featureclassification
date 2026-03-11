@@ -77,6 +77,39 @@ def forward_selection(data):
     return best_set, best_acc
 
 
+def backward_elimination(data):
+    current_set = list(range(1, len(data[0])))  # list of all featuers
+    best_set = current_set.copy()
+    best_acc = nearest_neighbor(data, current_set) # test accuracy with all features
+
+    current_acc = best_acc
+    while len(current_set) > 1:     # stop when one feature left
+        best_remove = None
+        branchlevel_acc = current_acc
+
+        for feature in sorted(current_set):
+            test_features = [x for x in current_set if x != feature] # removing features that are only in the current subset.
+                                                                # dont remove a feature that isnt even in the current
+            acc = nearest_neighbor(data, test_features)
+            print(f"Using features {test_features} accuracy is {acc * 100:.3f}%")
+
+            if acc > branchlevel_acc:
+                branchlevel_acc = acc
+                best_remove = feature
+        if best_remove is None: # early abandon if no removal improves accuracy
+            break
+
+        current_set.remove(best_remove) # actual removal
+        current_acc = branchlevel_acc
+
+        print(f"\nFeature set {current_set} was best after removal, accuracy is {current_acc * 100:.3f}%\n")
+
+        if current_acc > best_acc: # update best
+            best_acc = current_acc
+            best_set = current_set.copy()
+
+    return best_set, best_acc
+
 def main():
     while True:
         choice = input("Select dataset: type '1' for small, '2' for large, '3' for sanitycheck1, '4' for sanitycheck2: ").strip()
@@ -94,6 +127,9 @@ def main():
         choice = input("Select algorithm: type '1' for forward selection and '2' for backwards elimination").strip()
         if choice == '1':
             selected, sel_acc = forward_selection(data)
+            break
+        if choice == '2':
+            selected, sel_acc = backward_elimination(data)
             break
         print("Please enter '1' or '2'.")
     
