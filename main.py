@@ -11,10 +11,9 @@ def load(file):
             data.append(row)
     return data
 
-def nearest_neighbor(data):
+def nearest_neighbor(data, features):
     correct = 0
     samples = len(data)
-    features_size = len(data[0]) - 1
 
     for n in range(samples):
         
@@ -29,7 +28,7 @@ def nearest_neighbor(data):
             distance = 0
 
             # compute distance using all features
-            for feature in range(1, features_size + 1):
+            for feature in features:
                 difference = data[n][feature] - data[i][feature] #x1 - y1
                 distance += difference * difference #square
 
@@ -45,20 +44,59 @@ def nearest_neighbor(data):
     accuracy = correct / samples
     return accuracy
 
+def forward_selection(data):
+    remaining = set(range(1, len(data[0])))  # set of features
+    current_set = []
+    best_set = []
+    best_acc = 0.0
+    branchlevel_acc = 0.0
+    current_acc = 0.0
+
+    while remaining:
+        best_feature = None # best feature to add at a certain branch level
+        branchlevel_acc = -float("inf")
+        for new_feature in sorted(remaining): # test all features
+            test_features = current_set + [new_feature] # test current feature set + additional
+            acc = nearest_neighbor(data, test_features)
+            print(f"Using features {test_features} accuracy is {acc * 100:.3f}%")
+
+            if acc > branchlevel_acc: # if test feature is better than our other features at this level
+                branchlevel_acc = acc
+                best_feature = new_feature
+
+        current_set.append(best_feature) # add feature to this iteration
+        remaining.remove(best_feature) # remove from set. we would not test it again
+        current_acc = branchlevel_acc
+
+        print(f"\nFeature set {current_set} was best, accuracy is {branchlevel_acc * 100:.3f}%\n")
+        if current_acc > best_acc: #if new subset is better than global subset then replace
+            best_acc = current_acc
+            best_set = current_set.copy()
+
+    return best_set, best_acc
+
 def main():
     while True:
-        choice = input("Select dataset: type '1' for small or '2' for large: ").strip()
+        choice = input("Select dataset: type '1' for small, '2' for large, '3' for sanitycheck1, '4' for sanitycheck2: ").strip()
         if choice == '1':
             data_file = 'CS170_Small_DataSet__31.txt'
             break
         if choice == '2':
             data_file = 'CS170_Large_DataSet__7.txt'
             break
+        if choice == '3':
+            data_file = 'SanityCheck_DataSet__1.txt'
+            break
+        if choice == '4':
+            data_file = 'SanityCheckDataSet__2.txt'
+            break    
         print("Please enter '1' or '2'.")
   
     data = load(data_file)
 
-    print(f"Nearest-neighbor accuracy: {nearest_neighbor(data):.3%}")
+    selected, sel_acc = forward_selection(data)
+    print(f"Finished Search! The best feature subset is {selected}, which has an accuracy of {sel_acc:%}")
+
 
 
 if __name__ == "__main__":
