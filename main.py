@@ -1,5 +1,5 @@
 import math
-
+import time
 def load(file):
     data = []
     with open(file, 'r', encoding='utf-8') as dataset:
@@ -44,6 +44,12 @@ def nearest_neighbor(data, features):
     accuracy = correct / samples
     return accuracy
 
+
+def zero_features(data): # accuracy calculated for zero features
+    classList = [row[0] for row in data]
+    acc = max(classList.count(1.0), classList.count(2.0)) / len(classList)
+    return acc
+
 def forward_selection(data):
     remaining = set(range(1, len(data[0])))  # set of features
     current_set = []
@@ -54,7 +60,7 @@ def forward_selection(data):
 
     while remaining:
         best_feature = None # best feature to add at a certain branch level
-        branchlevel_acc = current_acc
+        branchlevel_acc = -float("inf")
         for new_feature in sorted(remaining): # test all features
             test_features = current_set + [new_feature] # test current feature set + additional
             acc = nearest_neighbor(data, test_features)
@@ -63,8 +69,8 @@ def forward_selection(data):
             if acc > branchlevel_acc: # if test feature is better than our other features at this level
                 branchlevel_acc = acc
                 best_feature = new_feature
-        if best_feature is None:    # early abandomment, if adding new features atlevel doesnt improve, break off.
-            break
+        # if best_feature is None:    # early abandomment, if adding new features atlevel doesnt improve, break off.
+        #     break
         current_set.append(best_feature) # add feature to this iteration
         remaining.remove(best_feature) # remove from set. we would not test it again
         current_acc = branchlevel_acc
@@ -85,7 +91,7 @@ def backward_elimination(data):
     current_acc = best_acc
     while len(current_set) > 1:     # stop when one feature left
         best_remove = None
-        branchlevel_acc = current_acc
+        branchlevel_acc = -float("inf")
 
         for feature in sorted(current_set):
             test_features = [x for x in current_set if x != feature] # removing features that are only in the current subset.
@@ -96,8 +102,8 @@ def backward_elimination(data):
             if acc > branchlevel_acc:
                 branchlevel_acc = acc
                 best_remove = feature
-        if best_remove is None: # early abandon if no removal improves accuracy
-            break
+        # if best_remove is None: # early abandon if no removal improves accuracy
+        #     break
 
         current_set.remove(best_remove) # actual removal
         current_acc = branchlevel_acc
@@ -131,15 +137,22 @@ def main():
         print("\t 2) Backward Elimination \n")
 
         choice = input("Select: ").strip()
+        print(f"Using features [] accuracy is {zero_features(data) * 100:.3f}% \n")
+
         if choice == '1':
+            start_time = time.perf_counter()
             selected, sel_acc = forward_selection(data)
+            end_time = time.perf_counter()
             break
         if choice == '2':
+            start_time = time.perf_counter()
             selected, sel_acc = backward_elimination(data)
+            end_time = time.perf_counter()
             break
         print("Please enter '1' or '2'.")
     
     print(f"Finished Search! The best feature subset is {selected}, which has an accuracy of {sel_acc:%}")
+    print(f"Elapsed time: {end_time - start_time:.3f} seconds")
 
 
 
