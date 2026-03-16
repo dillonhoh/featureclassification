@@ -75,7 +75,7 @@ def forward_selection(data):
         remaining.remove(best_feature) # remove from set. we would not test it again
         current_acc = branchlevel_acc
 
-        print(f"\nFeature set {current_set} was best, accuracy is {branchlevel_acc * 100:.3f}%\n")
+        print(f"\nFeature set {current_set} was best, accuracy is {branchlevel_acc * 100:.3f}%")
         if current_acc > best_acc: #if new subset is better than global subset then replace
             best_acc = current_acc
             best_set = current_set.copy()
@@ -108,7 +108,7 @@ def backward_elimination(data):
         current_set.remove(best_remove) # actual removal
         current_acc = branchlevel_acc
 
-        print(f"\nFeature set {current_set} was best after removal, accuracy is {current_acc * 100:.3f}%\n")
+        print(f"\nFeature set {current_set} was best after removal, accuracy is {current_acc * 100:.3f}%")
 
         if current_acc > best_acc: # update best
             best_acc = current_acc
@@ -131,28 +131,45 @@ def main():
             data_file = 'SanityCheckDataSet__2.txt'
   
         data = load(data_file)
+
+        # Print a dynamic trace reflecting the loaded data
+        features = len(data[0]) - 1
+        instances = len(data)
+        allfeatures = list(range(1, len(data[0])))
+        allacc = nearest_neighbor(data, allfeatures)
+
         
         print("Type the number of the algorithm you want to run. \n")
         print("\t 1) Forward Selection")
         print("\t 2) Backward Elimination \n")
 
         choice = input("Select: ").strip()
-        print(f"Using features [] accuracy is {zero_features(data) * 100:.3f}% \n")
+
+        print(f"This dataset has {features} features, with {instances} instances.")
+        print(f"Running nearest neighbor with all {features} features, using \"leaving-one-out\"")
+        print(f"evaluation, I get an accuracy of {allacc * 100:.1f}%")
+        print("Beginning search.\n")
 
         if choice == '1':
+            print(f"Using features [] accuracy is {zero_features(data) * 100:.3f}% \n")
             start_time = time.perf_counter()
             selected, sel_acc = forward_selection(data)
             end_time = time.perf_counter()
+            print(f"Finished Search! The best feature subset is {selected}, which has an accuracy of {sel_acc:%}")
+            print(f"Elapsed time: {end_time - start_time:.3f} seconds")
             break
         if choice == '2':
+            print(f"All feature subset has an accuracy of {allacc:%}")
             start_time = time.perf_counter()
             selected, sel_acc = backward_elimination(data)
             end_time = time.perf_counter()
+            print(f"Finished Search! The best feature subset is {selected}, which has an accuracy of {sel_acc:%}")
+            print(f"Elapsed time: {end_time - start_time:.3f} seconds")
             break
         print("Please enter '1' or '2'.")
     
-    print(f"Finished Search! The best feature subset is {selected}, which has an accuracy of {sel_acc:%}")
-    print(f"Elapsed time: {end_time - start_time:.3f} seconds")
+    # print(f"Finished Search! The best feature subset is {selected}, which has an accuracy of {sel_acc:%}")
+    # print(f"Elapsed time: {end_time - start_time:.3f} seconds")
 
 
 
